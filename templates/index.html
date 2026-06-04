@@ -1,0 +1,624 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLB-OSM 对齐调试器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 1000px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .panel-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .slider-group {
+            margin-bottom: 25px;
+        }
+        
+        .slider-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .slider-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .slider-controls input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider-controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+        }
+        
+        .slider-controls input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+        }
+        
+        .slider-value {
+            min-width: 80px;
+            text-align: right;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        .result-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #f5f7fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-card-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .stat-card-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .match-rate-good {
+            color: #4CAF50;
+        }
+        
+        .match-rate-ok {
+            color: #FF9800;
+        }
+        
+        .match-rate-bad {
+            color: #f44336;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .visualization-container {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: white;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #999;
+        }
+        
+        .status-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .preset-btn {
+            padding: 8px;
+            font-size: 0.9em;
+            background: #f0f0f0;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preset-btn:hover {
+            background: #e0e0e0;
+            border-color: #667eea;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #1565c0;
+            margin-top: 15px;
+        }
+
+        .canvas-legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-glb {
+            background: #667eea;
+        }
+
+        .legend-osm {
+            background: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 GLB-OSM 对齐调试器</h1>
+            <p>实时调整参数，查看匹配效果</p>
+        </div>
+        
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-title">⚙️ 对齐参数</div>
+                
+                <div class="status-message" id="status-message"></div>
+                
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="setRotation(0)">0°</button>
+                    <button class="preset-btn" onclick="setRotation(90)">90°</button>
+                    <button class="preset-btn" onclick="setRotation(180)">180°</button>
+                    <button class="preset-btn" onclick="setRotation(270)">270°</button>
+                </div>
+                
+                <div class="slider-group">
+                    <label>旋转角度</label>
+                    <div class="slider-controls">
+                        <input type="range" id="rotation" min="0" max="360" step="1" value="0">
+                        <span class="slider-value"><span id="rotation-value">0</span>°</span>
+                    </div>
+                </div>
+                
+                <div class="slider-group">
+                    <label>缩放因子</label>
+                    <div class="slider-controls">
+                        <input type="range" id="scale" min="0.5" max="2.0" step="0.05" value="1.0">
+                        <span class="slider-value"><span id="scale-value">1.0</span>x</span>
+                    </div>
+                </div>
+                
+                <div class="slider-group">
+                    <label>X 轴偏移</label>
+                    <div class="slider-controls">
+                        <input type="range" id="offset-x" min="-0.5" max="0.5" step="0.01" value="0.0">
+                        <span class="slider-value"><span id="offset-x-value">0.0</span></span>
+                    </div>
+                </div>
+                
+                <div class="slider-group">
+                    <label>Y 轴偏移</label>
+                    <div class="slider-controls">
+                        <input type="range" id="offset-y" min="-0.5" max="0.5" step="0.01" value="0.0">
+                        <span class="slider-value"><span id="offset-y-value">0.0</span></span>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    💡 <strong>提示：</strong>如果匹配率低，请尝试改变旋转角度。大多数情况下调整旋转即可解决！
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="resetParams()">↻ 重置</button>
+                    <button class="btn-primary" onclick="submitAlignment()" style="grid-column: 1 / -1;">✓ 确认并保存</button>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">📊 实时预览</div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-label">匹配率</div>
+                        <div class="stat-card-value" id="match-rate">--%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-label">已匹配</div>
+                        <div class="stat-card-value" id="matched-count">-/—</div>
+                    </div>
+                </div>
+                
+                <div class="result-box">
+                    <div id="status-text" class="loading">正在初始化...</div>
+                </div>
+                
+                <div class="visualization-container">
+                    <canvas id="match-canvas" width="400" height="300"></canvas>
+                    <div class="canvas-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot legend-glb"></div>
+                            <span>GLB 建筑</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot legend-osm"></div>
+                            <span>OSM 建筑</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let updateTimeout = null;
+        
+        ['rotation', 'scale', 'offset-x', 'offset-y'].forEach(id => {
+            document.getElementById(id).addEventListener('input', onParamsChange);
+        });
+        
+        function onParamsChange() {
+            const rotation = document.getElementById('rotation').value;
+            const scale = document.getElementById('scale').value;
+            const offsetX = document.getElementById('offset-x').value;
+            const offsetY = document.getElementById('offset-y').value;
+            
+            document.getElementById('rotation-value').textContent = rotation;
+            document.getElementById('scale-value').textContent = parseFloat(scale).toFixed(2);
+            document.getElementById('offset-x-value').textContent = parseFloat(offsetX).toFixed(2);
+            document.getElementById('offset-y-value').textContent = parseFloat(offsetY).toFixed(2);
+            
+            clearTimeout(updateTimeout);
+            updateTimeout = setTimeout(updateMatchRate, 500);
+        }
+        
+        function setRotation(angle) {
+            document.getElementById('rotation').value = angle;
+            onParamsChange();
+        }
+        
+        function resetParams() {
+            document.getElementById('rotation').value = 0;
+            document.getElementById('scale').value = 1.0;
+            document.getElementById('offset-x').value = 0.0;
+            document.getElementById('offset-y').value = 0.0;
+            onParamsChange();
+        }
+        
+        function getParams() {
+            return {
+                rotation: parseFloat(document.getElementById('rotation').value),
+                scale: parseFloat(document.getElementById('scale').value),
+                offset_x: parseFloat(document.getElementById('offset-x').value),
+                offset_y: parseFloat(document.getElementById('offset-y').value)
+            };
+        }
+        
+        function updateMatchRate() {
+            const params = getParams();
+            const statusEl = document.getElementById('status-text');
+            statusEl.innerHTML = '<div class="loading">计算中...</div>';
+            
+            fetch('/api/match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(params)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const matchRate = data.match_rate;
+                    const matchedCount = data.matched_count;
+                    const totalCount = data.total_count;
+                    
+                    document.getElementById('match-rate').textContent = matchRate.toFixed(1) + '%';
+                    document.getElementById('matched-count').textContent = matchedCount + '/' + totalCount;
+                    
+                    let colorClass = 'match-rate-bad';
+                    if (matchRate >= 70) colorClass = 'match-rate-good';
+                    else if (matchRate >= 40) colorClass = 'match-rate-ok';
+                    
+                    document.getElementById('match-rate').className = 'stat-card-value ' + colorClass;
+                    
+                    if (matchRate >= 70) {
+                        statusEl.innerHTML = '✓ 匹配效果很好！';
+                    } else if (matchRate >= 40) {
+                        statusEl.innerHTML = '⚠ 匹配效果一般';
+                    } else {
+                        statusEl.innerHTML = '✗ 匹配效果不佳';
+                    }
+                    
+                    drawMatchVisualization(data.matches);
+                } else {
+                    statusEl.innerHTML = '❌ ' + data.error;
+                }
+            })
+            .catch(err => {
+                statusEl.innerHTML = '❌ 请求失败: ' + err.message;
+            });
+        }
+        
+        function drawMatchVisualization(matches) {
+            const canvas = document.getElementById('match-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 获取 canvas 实际大小
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            
+            const padding = 30;
+            const width = canvas.width - 2 * padding;
+            const height = canvas.height - 2 * padding;
+            
+            // 清空背景
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制边框
+            ctx.strokeStyle = '#cccccc';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(padding, padding, width, height);
+            
+            // 绘制网格
+            ctx.strokeStyle = '#eeeeee';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const x = padding + (width / 5) * i;
+                const y = padding + (height / 5) * i;
+                
+                // 竖线
+                ctx.beginPath();
+                ctx.moveTo(x, padding);
+                ctx.lineTo(x, padding + height);
+                ctx.stroke();
+                
+                // 横线
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(padding + width, y);
+                ctx.stroke();
+            }
+            
+            // 绘制匹配点
+            if (matches && matches.length > 0) {
+                console.log('绘制 ' + matches.length + ' 个匹配点');
+                
+                matches.forEach((match, idx) => {
+                    // 确保坐标有效
+                    if (!match.glb_center || !match.osm_center) {
+                        console.warn('无效的匹配数据', match);
+                        return;
+                    }
+                    
+                    const glbX = padding + match.glb_center[0] * width;
+                    const glbY = padding + match.glb_center[1] * height;
+                    const osmX = padding + match.osm_center[0] * width;
+                    const osmY = padding + match.osm_center[1] * height;
+                    
+                    // 绘制连接线
+                    ctx.strokeStyle = 'rgba(200, 200, 200, 0.5)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(glbX, glbY);
+                    ctx.lineTo(osmX, osmY);
+                    ctx.stroke();
+                    
+                    // 绘制 GLB 点（蓝色）
+                    ctx.fillStyle = '#667eea';
+                    ctx.beginPath();
+                    ctx.arc(glbX, glbY, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // 绘制 OSM 点（绿色）
+                    ctx.fillStyle = '#4CAF50';
+                    ctx.beginPath();
+                    ctx.arc(osmX, osmY, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+            } else {
+                console.log('没有匹配点可绘制');
+                ctx.fillStyle = '#999999';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('暂无匹配数据', canvas.width / 2, canvas.height / 2);
+            }
+        }
+        
+        function submitAlignment() {
+            const params = getParams();
+            
+            if (confirm('确认保存这些对齐参数吗？')) {
+                const btn = event.target;
+                btn.disabled = true;
+                btn.textContent = '处理中...';
+                
+                fetch('/api/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(params)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const msg = document.getElementById('status-message');
+                        msg.className = 'status-message status-success';
+                        msg.innerHTML = '✓ ' + data.message + '<br>匹配率: ' + data.match_rate.toFixed(1) + '%';
+                        msg.style.display = 'block';
+                        alert('✓ 完成！文件已保存:\n- result.csv\n- result.json\n- alignment_config.json');
+                    } else {
+                        alert('❌ 错误: ' + data.error);
+                    }
+                    btn.disabled = false;
+                    btn.textContent = '✓ 确认并保存';
+                })
+                .catch(err => {
+                    alert('❌ 请求失败');
+                    btn.disabled = false;
+                    btn.textContent = '✓ 确认并保存';
+                });
+            }
+        }
+        
+        window.addEventListener('load', updateMatchRate);
+    </script>
+</body>
+</html>
+    
