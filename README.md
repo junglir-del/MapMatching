@@ -9,7 +9,7 @@ This map file is very big about 500MB, which is why not pushed to github.com
 python osm_pbf_to_buildings_glb.py ../Maps/jiangsu260603.osm.pbf buildings.glb --format glb --bbox 32.0000 118.7000 32.0900 118.8600 --material-mode infer
 
 1. 选择区域，根据经纬度生成glb，gltf（和bin）的地图文件
---bbox 32.0000 118.7000 32.0900 118.8600
+--bbox 32.0000 118.7000 32.0900 118.8600，南京市新街口附件区域
 经纬度的格式是： 
 bbox = (min_lon, min_lat, max_lon, max_lat)
 
