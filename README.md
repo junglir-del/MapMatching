@@ -4,8 +4,9 @@ Need to download the xxx.osm.pbf map first from https://download.geofabrik.de/.
 
 This map file is very big about 500MB, which is why not pushed to github.com
 
-# How to use the code: “osd_pbf_to_buildings+glb.py”
-# Example of command line as below:
+# How to use the code: “osm_pbf_to_buildings_glb.py”
+
+An example of command line as below:
 python osm_pbf_to_buildings_glb2.py ../Maps/jiangsu260603.osm.pbf buildings.glb --format glb --bbox 32.0000 118.7000 32.0900 118.8600 --material-mode infer
 
 输出是模型文件building.glb or .gltf(和bin) 和模型中的建筑物属性文件buildings_metadata.json
@@ -72,6 +73,18 @@ JSON 里同时写：
 actual_material
 resolved_material
 material_source
+
+# How to use the code: “osm_pbf_to_buildings_glb_no_json.py”
+
+An example of command line as below:
+python osm_pbf_to_buildings_gltf_no_json.py ../Maps/jiangsu260603.osm.pbf buildings.gltf --format gltf --bbox 32.0000 118.7000 32.0900 118.8600 --material-mode infer
+
+这里直接把
+        "inferred_material": "brick",
+        "material_inference_source": "default_brick",
+        "dielectric_constant": 4.44,
+        "conductivity_s_per_m": 0.018,
+写入到gltf中的extras扩展字段中，不会在生成单独的JSON文件。所以导入的话需要导入gltf+bin。也可以用buildings.glb --format glb生成glb格式试一下。 
 
 # 其他的python code还在开发中，比如glb_geo_mapper.py等同名文件
 下载几个大概几平方公里的地图，glb格式，可以用blender看到建筑物的模型的。https://threejs.org/editor/， 这个网站看模型也简单好用。但些文件中通常不包含建筑物类型和名称，所以不知道建筑物的材料和介电常数电导率。于是可以从网上查一下建筑物的类型和名称，就是网页上看到的地图中的建筑物名称。现在可以用AI编这个程序，把模型中的每一个建筑物的名字材料从地图上找出来。
