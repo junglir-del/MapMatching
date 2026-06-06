@@ -8,10 +8,41 @@ This map file is very big about 500MB, which is why not pushed to github.com
 # Example of command line as below:
 python osm_pbf_to_buildings_glb.py ../Maps/jiangsu260603.osm.pbf buildings.glb --format glb --bbox 32.0000 118.7000 32.0900 118.8600 --material-mode infer
 
+输出是模型文件building.glb or .gltf(和bin) 和模型中的建筑物属性文件buildings_metadata.json
+
+模型可以用这个网站导入模型：https://threejs.org/editor/，用高德地图验证是否正确：https://www.amap.com/search?query=%E5%8D%97%E4%BA%AC&city=110000&geoobj=115.41888%7C39.294693%7C118.249433%7C40.571008&zoom=9.04 （定位南京）
+
 1. 选择区域，根据经纬度生成glb，gltf（和bin）的地图文件
---bbox 32.0000 118.7000 32.0900 118.8600，南京市新街口附件区域
+--bbox 32.0000 118.7000 32.0900 118.8600，南京市新街口附件区域。
 经纬度的格式是： 
-bbox = (min_lon, min_lat, max_lon, max_lat)
+bbox = (min_lon, min_lat, max_lon, max_lat)，最小经度，最小纬度，最大经度，最大纬度
+
+另外还有一下的经纬度方便测试 （用的时候去掉逗号）：
+    "New York Manhattan": (40.70, -74.02, 40.72, -73.99), (建筑很多，程序比较慢)
+    "London Camden": (51.52, -0.19, 51.56, -0.11),
+    "London Canary Wharf": (51.49, -0.02, 51.51, 0.02),
+    "Shanghai Pudong": (31.20, 121.45, 31.27, 121.55),
+    "Nanjing Jiangning": (31.63, 118.42, 32.10, 119.05),
+    "Nanjing Xinjiekou": (32.0000, 118.7000, 32.0900, 118.8600),
+    "Nanjing Baijiahu": (31.9100, 118.7750, 31.9700, 118.8500)
+
+国内地图的经纬度一般可以从AI中直接问出来，也可以从高德的地图找：https://lbs.amap.com/demo/javascript-api/example/3d/map3d。在右侧的HTML脚本中有这个functions， center:[116.333926,39.997245] 就是地图任意位置的经纬度值。
+
+function mapInit(){
+  map = new AMap.Map('container', {
+    resizeEnable: true,
+    rotateEnable:true,
+    pitchEnable:true,
+    zoom: 17,
+    pitch:80,
+    rotation:-15,
+    viewMode:'3D',//开启3D视图,默认为关闭
+    buildingAnimation:true,//楼块出现是否带动画
+    
+    expandZoomRange:true,
+    zooms:[3,20],
+    center:[116.333926,39.997245]
+  });
 
 2. 选择输出 .glb 还是 .gltf
 --format glb

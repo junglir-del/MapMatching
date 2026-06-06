@@ -9,7 +9,7 @@ from plotly.subplots import make_subplots
 from tqdm import tqdm
 
 CITY_BBOX = {
-    "New York Manhattan": (40.70, -74.02, 40.88, -73.90),
+    "New York Manhattan": (40.70, -74.02, 40.72, -73.99),
     "London Camden": (51.52, -0.19, 51.56, -0.11),
     "London Canary Wharf": (51.49, -0.02, 51.51, 0.02),
     "Shanghai Pudong": (31.20, 121.45, 31.27, 121.55),
