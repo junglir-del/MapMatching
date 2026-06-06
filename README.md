@@ -74,5 +74,47 @@ resolved_material
 material_source
 
 # 其他的python code还在开发中，比如glb_geo_mapper.py等同名文件
-下载几个大概几平方公里的地图，glb格式，可以用blender看到建筑物的模型的。https://threejs.org/editor/， 这个网站简单好用。但些文件中通常不包含建筑物类型和名称，所以不知道建筑物的材料和介电常数电导率。于是可以从网上查一下建筑物的类型和名称，就是网页上看到的地图中的建筑物名称。现在可以用AI编这个程序，把模型中的每一个建筑物的名字材料从地图上找出来。
-但是，现在的有的代码是从xxx.osm.pbf中找建筑的材料，建筑名称。但xxx.osm.pbf中有的建筑含有，有的建筑没有。国外的地图包含建筑材料全一些。但国内的不全，或者很少。
+下载几个大概几平方公里的地图，glb格式，可以用blender看到建筑物的模型的。https://threejs.org/editor/， 这个网站看模型也简单好用。但些文件中通常不包含建筑物类型和名称，所以不知道建筑物的材料和介电常数电导率。于是可以从网上查一下建筑物的类型和名称，就是网页上看到的地图中的建筑物名称。现在可以用AI编这个程序，把模型中的每一个建筑物的名字材料从地图上找出来。
+但是，现在的有的代码是从xxx.osm.pbf中找建筑的材料，建筑名称。但xxx.osm.pbf中有的建筑含有，有的建筑没有。国外的地图包含建筑材料全一些。
+
+# New JSON file, may still need to adjusted
+
+The original OSM tags are kept intact inside:
+
+"source_tags": {
+  "amenity": "fire_station",
+  "building": "yes",
+  "name": "汉中门消防中队"
+}
+We do not change source_tags.
+
+The added fields are:
+
+"inferred_material": "brick",
+"material_inference_source": "amenity:fire_station",
+"dielectric_constant": 4.44,
+"conductivity_s_per_m": 0.018
+
+"osm_type": "way",
+"osm_id": 88678776,
+"height_m": 8.0
+
+The JSON looks like below:
+
+{
+  "osm": {
+    "type": "way",
+    "id": 88678776,
+    "tags": {
+      "amenity": "fire_station",
+      "building": "yes",
+      "name": "汉中门消防中队"
+    }
+  },
+  "derived": {
+    "inferred_material": "brick",
+    "material_inference_source": "amenity:fire_station",
+    "dielectric_constant": 4.44,
+    "conductivity_s_per_m": 0.018
+  }
+}
