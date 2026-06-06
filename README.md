@@ -6,7 +6,7 @@ This map file is very big about 500MB, which is why not pushed to github.com
 
 # How to use the code: “osd_pbf_to_buildings+glb.py”
 # Example of command line as below:
-python osm_pbf_to_buildings_glb.py ../Maps/jiangsu260603.osm.pbf buildings.glb --format glb --bbox 32.0000 118.7000 32.0900 118.8600 --material-mode infer
+python osm_pbf_to_buildings_glb2.py ../Maps/jiangsu260603.osm.pbf buildings.glb --format glb --bbox 32.0000 118.7000 32.0900 118.8600 --material-mode infer
 
 输出是模型文件building.glb or .gltf(和bin) 和模型中的建筑物属性文件buildings_metadata.json
 
