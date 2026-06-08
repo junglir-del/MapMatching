@@ -1,6 +1,7 @@
 # MapMatching
 
-Need to download the xxx.osm.pbf map first from https://download.geofabrik.de/. 
+Need to download the xxx.osm.pbf map first from https://download.geofabrik.de/。中国江苏的地图从这里下载https://download.geofabrik.de/asia/china/jiangsu.html/。
+
 
 This map file is very big about 500MB, which is why not pushed to github.com
 
