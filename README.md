@@ -8,7 +8,9 @@ This map file is very big about 500MB, which is why not pushed to github.com
 # How to use the code: “osm_pbf_to_buildings_gltf_plus_json3.py”
 
 An example of command line as below:
-python osm_pbf_to_buildings_gltf_plus_json3.py ../Maps/jiangsu260603.osm.pbf buildings.glb --format glb --bbox 32.0000 118.7000 32.0900 118.8600 --material-mode infer
+没有地形高低起伏的（python osm_pbf_to_buildings_gltf_plus_json3.py ../Maps/jiangsu260603.osm.pbf buildings.glb --format glb --bbox 32.0000 118.7000 32.0900 118.8600 --material-mode infer）
+
+包含地形起伏高低（python3 osm_pbf_DEM4_precise_soil_fill.py ../Maps/chongqing-260703.osm.pbf output_soil_fill.glb --bbox 29.5410 106.5238 29.5865 106.5948 --material-mode infer --download-dem --dem-type COP30 --terrain-grid 200）
 
 输出是模型文件building.glb 和模型中的建筑物属性文件buildings_extras.json
 
@@ -20,18 +22,31 @@ python osm_pbf_to_buildings_gltf_plus_json3.py ../Maps/jiangsu260603.osm.pbf bui
 bbox = (min_lon, min_lat, max_lon, max_lat)，最小经度，最小纬度，最大经度，最大纬度
 
 另外还有一下的经纬度方便测试 （用的时候去掉逗号）：
-    "New York Manhattan": (40.70, -74.02, 40.72, -73.99), (建筑很多，程序比较慢)
-    "London Camden": (51.52, -0.19, 51.56, -0.11),
-    "London Canary Wharf": (51.49, -0.02, 51.51, 0.02),
-    "Shanghai Pudong": (31.20, 121.45, 31.27, 121.55),
-    "Nanjing Jiangning": (31.63, 118.42, 32.10, 119.05),
-    "Nanjing Xinjiekou": (32.0000, 118.7000, 32.0900, 118.8600),
-    "Nanjing Baijiahu": (31.9100, 118.7750, 31.9700, 118.8500)
+    "New York Manhattan": (40.70 -74.02 40.72 -73.99), (建筑很多，程序比较慢)
+    "London Camden": (51.52 -0.19 51.56 -0.11),
+    "London Canary Wharf": (51.49 -0.02 51.51 0.02),
+    "Shanghai Pudong": (31.20 121.45 31.27 121.55),
+    "Nanjing Jiangning": (31.63 118.42 32.10 119.05),
+    "Nanjing Xinjiekou": (32.0000 118.7000 32.0900 118.8600),
+    "Nanjing Baijiahu": (31.9100 118.7750 31.9700 118.8500)
+    "nanjing zijinshan" : (118.825 32.032 118.8655 32.0605)
+    "chongqing": (29.5410 106.5238 29.5865 106.5948)
+    "Edinburgh": (55.93 -3.18 55.96 -3.21)
 
 国内地图的经纬度一般可以从AI中直接问出来，也可以从高德的地图找：https://lbs.amap.com/demo/javascript-api/example/3d/map3d。在右侧的HTML脚本中有这个function mapInit()， 其中center:[116.333926,39.997245] 就是地图任意位置的经纬度值。
 
 2. 选择输出 .glb 还是 .gltf
 --format glb, 或者 --format gltf
+--download-dem：按你输入的 bbox 从 OpenTopography 下载裁剪好的 DEM GeoTIFF
+--dem path.tif：使用已有 DEM
+--terrain-grid 160 的意思是：
+把整个 bbox 地形切成 160 x 160 个小格子
+--terrain-grid 60    快速测试
+--terrain-grid 80    比较快，适合大区域
+--terrain-grid 120   平衡
+--terrain-grid 160   细节较好，但慢
+--terrain-grid 200+  更细，但不建议大区域直接用
+
 
 3. 给建筑物赋材料
 --material-mode infer
@@ -62,6 +77,30 @@ roof:material
         "dielectric_constant": 4.44,
         "conductivity_s_per_m": 0.018,
 写入到gltf中的extras扩展字段中，也写在生成单独的JSON文件。 
+
+
+4. 另外黑色/背景剩余区域不生成几何,或者被土壤填充：
+只在 _extras.json 里记录这些（未）建模背景区域按 soil 处理，比如：
+"remaining_ground_generated": false,
+"unmodeled_background_material": "soil",
+"unmodeled_background_note": "No ground mesh is generated in DEM mode unless 
+
+
+5. 另外还有一些参数可以调整， 比如用一下命令运行：
+python3 osm_pbf_DEM4_precise_soil_fill.py input.osm.pbf output.glb \
+  --bbox minLat minLon maxLat maxLon \
+  --dem your_dem.tif \
+  --soil-fill-mode precise \
+  --soil-road-margin 0.5 \
+  --soil-min-area 0.25 \
+  --soil-simplify 0.05 \
+  --terrain-offset -0.02
+参数意思：
+--soil-fill-mode precise：只填建筑、道路、水体、植被等之间的真实空白区域。
+--soil-road-margin 0.5：道路边缘额外扣掉 0.5 米，减少道路旁黑缝。
+--soil-min-area 0.25：小于 0.25 平方米的碎土壤面不要，减少碎片。
+--soil-simplify 0.05：轻微简化土壤边界，单位米。
+--terrain-offset -0.02：土壤面比道路/建筑/植被略低 2 cm，减少闪烁或重叠面。
 
 -------------------------------------------------------
 另外"osm_type": "way" 表示这个对象在 OSM 里的原始类型是 way。
