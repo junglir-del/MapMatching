@@ -10,7 +10,7 @@ This map file is very big about 500MB, which is why not pushed to github.com
 An example of command line as below:
 没有地形高低起伏的（python osm_pbf_to_buildings_gltf_plus_json3.py ../Maps/jiangsu260603.osm.pbf buildings.glb --format glb --bbox 32.0000 118.7000 32.0900 118.8600 --material-mode infer）
 
-包含地形起伏高低（python3 osm_pbf_DEM4_precise_soil_fill.py ../Maps/chongqing-260703.osm.pbf output_soil_fill.glb --bbox 29.5410 106.5238 29.5865 106.5948 --material-mode infer --download-dem --dem-type COP30 --terrain-grid 200）
+包含地形起伏高低（python3 osm_pbf_DEM4_precise_soil_fill2.py ../Maps/chongqing-260703.osm.pbf output_soil_fill.glb --bbox 29.5410 106.5238 29.5865 106.5948 --material-mode infer --download-dem --dem-type COP30 --terrain-grid 200）
 
 输出是模型文件building.glb 和模型中的建筑物属性文件buildings_extras.json
 
@@ -31,7 +31,7 @@ bbox = (min_lon, min_lat, max_lon, max_lat)，最小经度，最小纬度，最�
     "Nanjing Baijiahu": (31.9100 118.7750 31.9700 118.8500)
     "nanjing zijinshan" : (118.825 32.032 118.8655 32.0605)
     "chongqing": (29.5410 106.5238 29.5865 106.5948)
-    "Edinburgh": (55.93 -3.18 55.96 -3.21)
+    "Edinburgh": (55.9429 -3.1752 55.9609 -3.2074)
 
 国内地图的经纬度一般可以从AI中直接问出来，也可以从高德的地图找：https://lbs.amap.com/demo/javascript-api/example/3d/map3d。在右侧的HTML脚本中有这个function mapInit()， 其中center:[116.333926,39.997245] 就是地图任意位置的经纬度值。
 
